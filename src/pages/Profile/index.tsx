@@ -11,6 +11,7 @@ import {useNavigation} from '@react-navigation/native';
 import * as Yup from 'yup';
 import api from '../../services/api';
 import Icon from 'react-native-vector-icons/Feather';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 import {Form} from '@unform/mobile';
 import {FormHandles} from '@unform/core';
@@ -116,8 +117,36 @@ const Profile: React.FC = () => {
         );
       }
     },
-    [navigation],
+    [navigation, updateUser],
   );
+
+  const handleUpdateAvatar = useCallback(() => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+      },
+      (response) => {
+        if (response.didCancel) {
+          return;
+        } else if (response.errorCode) {
+          Alert.alert('ImagePicker erro', response.errorMessage);
+          return;
+        } else {
+          const data = new FormData();
+
+          data.append('avatar', {
+            uri: response.uri,
+            type: 'image/jpeg',
+            name: `${user.id}.jpg`,
+          });
+
+          api.patch('/users/avatar', data).then((apiResponse) => {
+            updateUser(apiResponse.data);
+          });
+        }
+      },
+    );
+  }, [updateUser, user.id]);
 
   const handleGoBack = useCallback(() => {
     navigation.goBack();
@@ -136,7 +165,7 @@ const Profile: React.FC = () => {
             <BackButton onPress={handleGoBack}>
               <Icon name="chevron-left" size={24} color="#999591" />
             </BackButton>
-            <UserAvatarButton onPress={() => {}}>
+            <UserAvatarButton onPress={handleUpdateAvatar}>
               <UserAvatar source={{uri: user.avatar_url}} />
             </UserAvatarButton>
 
