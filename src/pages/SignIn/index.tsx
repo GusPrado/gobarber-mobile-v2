@@ -108,7 +108,7 @@ const SignIn: React.FC = () => {
                 icon="mail"
                 placeholder="E-mail"
                 returnKeyType="next"
-                onSubmitEditing={}
+                onSubmitEditing={() => passwordInputRef.current?.focus()}
               />
               <Input
                 ref={passwordInputRef}
